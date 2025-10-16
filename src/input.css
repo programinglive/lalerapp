@@ -1,0 +1,607 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for dump viewer */
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+
+  --panel-bg: #ffffff;
+  --panel-border: #d7dce5;
+  --summary-bg: rgba(79, 70, 229, 0.05);
+  --summary-border: rgba(79, 70, 229, 0.12);
+  --summary-hover: rgba(79, 70, 229, 0.10);
+  --summary-text: #374151;
+  --meta-chip-bg: rgba(15, 23, 42, 0.08);
+  --meta-chip-text: #1f2937;
+  --meta-separator: rgba(30, 41, 59, 0.35);
+  --dump-type-bg: rgba(37, 99, 235, 0.15);
+  --dump-type-text: #1d4ed8;
+  --arrow-color: #3b82f6;
+
+  --header-color: #111827;
+  --controls-bg: rgba(255, 255, 255, 0.6);
+  --controls-border: rgba(37, 99, 235, 0.15);
+  --controls-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Symfony VarDumper (dd) styles */
+.sf-dump-wrapper {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+}
+
+.sf-dump {
+  background: transparent !important;
+  color: #e2e8f0;
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+}
+
+.sf-dump-search-wrapper { display: none; }
+
+.sf-dump-compact { display: none; }
+.sf-dump-expanded { display: block; }
+
+.sf-dump-note { color: #60a5fa; }
+.sf-dump-key { color: #60a5fa; }
+.sf-dump-str { color: #34d399; }
+.sf-dump-num { color: #fbbf24; }
+.sf-dump-const { color: #f472b6; }
+
+.sf-dump-ref.sf-dump-toggle span { color: #f59e0b; font-weight: 700; }
+.sf-dump-ref.sf-dump-toggle { color: #94a3b8; text-decoration: none; }
+
+/* Stylized summary spans we inject for Laravel text mode */
+.dd-key { color: #60a5fa; font-weight: 600; }
+.dd-note { color: #60a5fa; }
+.dd-count { color: #fbbf24; font-weight: 600; }
+.dd-class { color: #60a5fa; text-decoration: none; }
+.dd-arrow { color: #94a3b8; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(145deg, rgba(55,118,255,0.12), rgba(15,23,42,0.15));
+}
+
+.container {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Dump Display Styles */
+.dump-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 1rem;
+  text-align: left;
+  gap: 1.5rem;
+}
+
+.dump-section h1 {
+  color: var(--header-color);
+  text-align: center;
+  font-size: 2.25rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+}
+
+.dump-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  background: var(--controls-bg);
+  border: 1px solid var(--controls-border);
+  box-shadow: var(--controls-shadow);
+}
+
+#dump-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  padding: 1.5rem;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+}
+
+.dump-item {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.3rem 0.5rem;
+  margin: 0;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dump-summary {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  list-style: none;
+  cursor: pointer;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--summary-bg);
+  border: 1px solid var(--summary-border);
+  border-radius: 8px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.dump-summary::-webkit-details-marker {
+  display: none;
+}
+
+.dump-summary::before {
+  content: "▸";
+  margin-right: 0.5rem;
+  transition: transform 0.2s ease;
+  color: var(--arrow-color);
+  font-size: 1.1rem;
+}
+
+.dump-item[open] > .dump-summary::before {
+  transform: rotate(90deg);
+}
+
+.dump-item:not([open]) .dump-summary:hover {
+  background: var(--summary-hover);
+  border-color: rgba(79, 70, 229, 0.20);
+}
+
+.dump-item[open] {
+  border-color: rgba(79, 70, 229, 0.25);
+  background: rgba(79, 70, 229, 0.03);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.15);
+}
+
+.dump-summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dump-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.dump-summary-row.primary {
+  font-weight: 600;
+  color: var(--summary-text);
+}
+
+.dump-summary-row.meta {
+  font-size: 0.8rem;
+  color: rgba(15, 23, 42, 0.65);
+}
+
+.dump-type {
+  background: var(--dump-type-bg);
+  color: var(--dump-type-text);
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dump-meta-item {
+  background: var(--meta-chip-bg);
+  color: var(--meta-chip-text);
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.dump-meta-separator {
+  color: var(--meta-separator);
+}
+
+.dump-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.dump-file {
+  font-family: 'Courier New', monospace;
+  background: #f5f5f5;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.dump-timestamp {
+  font-weight: 500;
+}
+
+.dump-output {
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
+}
+
+/* JSON Viewer Styles */
+.json-viewer {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.json-collapsible {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.json-toggle {
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+  font-family: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.json-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.json-toggle::before {
+  content: "▸";
+  display: inline-block;
+  width: 1rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.json-collapsible[open] > .json-toggle::before {
+  transform: rotate(90deg);
+}
+
+.json-toggle:hover {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.json-content {
+  margin-left: 0.6rem;
+  padding-left: 0.2rem;
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.json-item {
+  margin: 0;
+  padding: 0;
+}
+
+.json-indent {
+  color: transparent;
+  user-select: none;
+}
+
+/* JSON Syntax Highlighting */
+.json-key {
+  color: #f8b89a;
+  font-weight: 500;
+}
+
+.json-string {
+  color: #a7f3d0;
+}
+
+.json-number {
+  color: #fbbf24;
+}
+
+.json-boolean {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.json-null {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.json-bracket {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.json-colon {
+  color: #cbd5e1;
+  margin: 0 0.25rem;
+}
+
+.json-summary {
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* Laravel Dump Viewer Styles */
+.laravel-dump-viewer {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  color: #e2e8f0;
+}
+
+.laravel-collapsible {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.laravel-dump-item {
+  padding: 0;
+  margin: 0;
+  display: block;
+  font-family: inherit;
+}
+
+.laravel-class {
+  color: #f8b89a;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
+.laravel-class::-webkit-details-marker {
+  display: none;
+}
+
+summary.laravel-class::before {
+  content: "▸";
+  display: inline-block;
+  width: 1rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.laravel-collapsible[open] > summary.laravel-class::before {
+  transform: rotate(90deg);
+}
+
+.laravel-property {
+  color: #a7f3d0;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
+.laravel-property::-webkit-details-marker {
+  display: none;
+}
+
+summary.laravel-property::before {
+  content: "▸";
+  display: inline-block;
+  width: 1rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.laravel-collapsible[open] > summary.laravel-property::before {
+  transform: rotate(90deg);
+}
+
+.laravel-array-item {
+  color: #fbbf24;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
+.laravel-array-item::-webkit-details-marker {
+  display: none;
+}
+
+summary.laravel-array-item::before {
+  content: "▸";
+  display: inline-block;
+  width: 1rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.laravel-collapsible[open] > summary.laravel-array-item::before {
+  transform: rotate(90deg);
+}
+
+.laravel-object-property {
+  color: #c084fc;
+  font-weight: 400;
+}
+
+.laravel-content {
+  margin-left: 0.6rem;
+  padding-left: 0.2rem;
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.laravel-class:hover,
+.laravel-property:hover,
+.laravel-array-item:hover {
+  background: rgba(79, 70, 229, 0.08);
+  border-radius: 4px;
+}
+
+/* Non-collapsible items styling */
+.laravel-no-children {
+  padding: 0;
+  margin: 0;
+  display: block;
+  font-family: inherit;
+}
+
+.no-dumps {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 2rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #1a1d29;
+
+    --panel-bg: rgba(12, 15, 25, 0.82);
+    --panel-border: rgba(59, 76, 202, 0.4);
+    --summary-bg: rgba(37, 99, 235, 0.12);
+    --summary-border: rgba(37, 99, 235, 0.35);
+    --summary-hover: rgba(37, 99, 235, 0.25);
+    --summary-text: #dbeafe;
+    --meta-chip-bg: rgba(30, 41, 59, 0.65);
+    --meta-chip-text: #e2e8f0;
+    --meta-separator: rgba(148, 163, 184, 0.65);
+    --dump-type-bg: rgba(59, 130, 246, 0.28);
+    --dump-type-text: #bfdbfe;
+    --arrow-color: #93c5fd;
+
+    --header-color: #f8fafc;
+    --controls-bg: rgba(15, 23, 42, 0.65);
+    --controls-border: rgba(94, 234, 212, 0.2);
+    --controls-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+  }
+
+  #dump-container {
+    border-color: #444;
+    background: var(--panel-bg);
+  }
+  
+  .dump-item {
+    border-bottom-color: rgba(59, 76, 202, 0.35);
+  }
+  
+  .dump-header {
+    color: #ccc;
+  }
+  
+  .dump-output {
+    background: rgba(8, 12, 24, 0.95);
+    color: #e2e8f0;
+  }
+  
+  /* Dark theme JSON syntax highlighting */
+  .json-key {
+    color: #fcd34d;
+  }
+  
+  .json-string {
+    color: #6ee7b7;
+  }
+  
+  .json-number {
+    color: #fb923c;
+  }
+  
+  .json-boolean {
+    color: #c4b5fd;
+  }
+  
+  .json-null {
+    color: #9ca3af;
+  }
+  
+  .json-bracket {
+    color: #e2e8f0;
+  }
+  
+  .json-colon {
+    color: #e2e8f0;
+  }
+  
+  .json-summary {
+    color: #94a3b8;
+  }
+  
+  .json-toggle:hover {
+    background: rgba(37, 99, 235, 0.15);
+  }
+  
+  .json-content {
+    border-left-color: rgba(148, 163, 184, 0.3);
+  }
+  
+  /* Dark theme Laravel dump styles */
+  .laravel-class {
+    color: #fcd34d;
+  }
+  
+  .laravel-property {
+    color: #6ee7b7;
+  }
+  
+  .laravel-array-item {
+    color: #fb923c;
+  }
+  
+  .laravel-object-property {
+    color: #c4b5fd;
+  }
+  
+  .laravel-content {
+    border-left-color: rgba(148, 163, 184, 0.3);
+  }
+  
+  .laravel-class:hover,
+  .laravel-property:hover,
+  .laravel-array-item:hover {
+    background: rgba(37, 99, 235, 0.15);
+  }
+  
+  .laravel-array-item {
+    color: #fb923c;
+  }
+}

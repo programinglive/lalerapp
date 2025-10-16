@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
+    <title>lalerapp</title>
     <script type="module" src="/main.js" defer></script>
   </head>
 
@@ -12,9 +12,19 @@
     <main class="container">
       <div class="dump-section">
         <h1>Laravel Dump Output</h1>
-        <div class="dump-controls">
-          <button id="refresh-dumps">Refresh</button>
-          <button id="clear-dumps">Clear All</button>
+        <div class="dump-controls gap-3">
+          <button
+            id="refresh-dumps"
+            class="px-4 py-2 rounded-md bg-blue-500 text-white font-semibold shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition"
+          >
+            Refresh
+          </button>
+          <button
+            id="clear-dumps"
+            class="px-4 py-2 rounded-md bg-slate-200 text-slate-800 font-semibold shadow-sm hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition"
+          >
+            Clear All
+          </button>
         </div>
         <div id="dump-container">
           <p id="no-dumps" class="no-dumps">No dumps available</p>
