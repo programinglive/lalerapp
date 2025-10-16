@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <div class="dump-section">
+        <h1>Laravel Dump Output</h1>
+        <div class="dump-controls">
+          <button id="refresh-dumps">Refresh</button>
+          <button id="clear-dumps">Clear All</button>
+        </div>
+        <div id="dump-container">
+          <p id="no-dumps" class="no-dumps">No dumps available</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
