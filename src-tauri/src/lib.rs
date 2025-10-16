@@ -36,8 +36,11 @@ async fn start_http_server(dump_store: DumpStore) {
 
     let routes = dump_route.with(cors);
 
-    println!("Starting HTTP server on http://localhost:3000");
-    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
+    println!("Starting HTTP server on 127.0.0.1:3000 and [::1]:3000");
+    tokio::join!(
+        warp::serve(routes.clone()).run(([127, 0, 0, 1], 3000)),
+        warp::serve(routes).run(([0, 0, 0, 0, 0, 0, 0, 1], 3000)),
+    );
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
