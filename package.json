@@ -7,6 +7,7 @@
     "build-css": "npx tailwindcss -i ./src/input.css -o ./src/styles.css --watch",
     "build-css-prod": "npx tailwindcss -i ./src/input.css -o ./src/styles.css --minify",
     "tauri:build": "npm run build-css-prod && npx tauri build",
+    "tauri": "tauri",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,8 +15,8 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0",
     "@tailwindcss/cli": "^4.1.14",
+    "@tauri-apps/cli": "^2.8.4",
     "tailwindcss": "^4.1.14"
   }
 }
