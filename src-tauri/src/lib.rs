@@ -36,11 +36,20 @@ async fn start_http_server(dump_store: DumpStore) {
 
     let routes = dump_route.with(cors);
 
-    println!("Starting HTTP server on 127.0.0.1:3000 and [::1]:3000");
-    tokio::join!(
-        warp::serve(routes.clone()).run(([127, 0, 0, 1], 3000)),
-        warp::serve(routes).run(([0, 0, 0, 0, 0, 0, 0, 1], 3000)),
-    );
+    #[cfg(target_os = "android")]
+    {
+        println!("Starting HTTP server on 0.0.0.0:3000 (android)");
+        warp::serve(routes).run(([0, 0, 0, 0], 3000)).await;
+    }
+
+    #[cfg(not(target_os = "android"))]
+    {
+        println!("Starting HTTP server on 127.0.0.1:3000 and [::1]:3000");
+        tokio::join!(
+            warp::serve(routes.clone()).run(([127, 0, 0, 1], 3000)),
+            warp::serve(routes).run(([0, 0, 0, 0, 0, 0, 0, 1], 3000)),
+        );
+    }
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
